@@ -1,11 +1,18 @@
+# docker compose -f docker-compose.yml down -v
+# docker compose -f docker-compose.yml up -d --build
+# docker compose up --build
+# docker exec -it nginx bash
+# docker build . -t static
+
+
 version: '3.8'
 
 services:
   database:
     container_name: db_postgres
     image: postgres:15.2-alpine
-    ports:
-      - 5432:5432
+#    ports:
+#      - 5432:5432
     environment:
       POSTGRES_USER: "user"
       POSTGRES_PASSWORD: "pswd"
@@ -18,7 +25,7 @@ services:
       - ./pg_data:/var/lib/postgresql/data/pgdata
 #      - ./postgresql.conf:/var/lib/postgresql/data/postgresql.conf
     expose:
-      - 5000
+      - 5432
     restart: on-failure
     networks:
       my_network:
@@ -30,8 +37,8 @@ services:
 #    command: python app.py run -h 0.0.0.0
     working_dir: /backend
     restart: on-failure
-    ports:
-      - 5000:5000
+    expose:
+      - 5000
     env_file:
       - ./.env
     environment:
@@ -47,33 +54,16 @@ services:
           - flask_app
 
   nginx:
-
     build: ./nginx
-
     container_name: nginx
-    expose:
-      - 80
+    ports:
+      - 8080:80
     depends_on:
       - flask
 
+    networks:
+      my_network:
+
 networks:
   my_network:
-
-
-#    driver: bridge
-
-#  nginx:
-#    image: nginx:1.17-alpine
-#    container_name: nginx
-#    volumes:
-##      - ./nginx_default.conf:/etc/nginx/conf.d/nginx_default.conf
-#      - /static:/home/static
-#    ports:
-#      - 80:80
-#    depends_on:
-#      - flask
-
-
-
-
 
