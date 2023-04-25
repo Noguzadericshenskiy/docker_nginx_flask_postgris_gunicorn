@@ -61,6 +61,12 @@ def fill_db():
     list_coffee = asyncio.run(get_coffee())
     add_data_in_db(list_users, list_address, list_coffee)
 
+def fill_db1():
+    list_users = asyncio.run(get_users())
+    list_address = asyncio.run(get_address())
+    list_coffee = asyncio.run(get_coffee())
+    add_data_in_db(list_users, list_address, list_coffee)
+
 
 @logger.catch
 def add_data_in_db(users, address, coffee):

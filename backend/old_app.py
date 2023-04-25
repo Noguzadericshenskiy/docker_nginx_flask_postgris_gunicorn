@@ -1,118 +1,92 @@
-import os
-from sqlalchemy import Column, Integer, String, Float, \
-    create_engine, Sequence, Identity, ForeignKey, delete
-from sqlalchemy.orm import sessionmaker, declarative_base, relationship
-from flask import Flask, jsonify
-from typing import Dict, Any
+import json
 from sqlalchemy.dialects.postgresql import insert
+from sqlalchemy import create_engine
+from sqlalchemy.orm import declarative_base, sessionmaker
 
-from db import Base, session
+from models import User, Coffee
+from cli import fill_db1
 
-from models import User, Product
-
-
-
-app = Flask(__name__)
-# engine = create_engine(os.getenv("DATABASE_URL", "sqlite://"))
-# Base = declarative_base()
-# Session = sessionmaker(bind=engine)
-# session = Session()
+from loguru import logger
 
 
-# class Product(Base):
-#     __tablename__ = 'products'
-#
-#     id = Column(Integer, Sequence('product_id_seq'), primary_key=True)
-#     title = Column(String(200), nullable=False)
-#     count = Column(Integer, default=0)
-#     price = Column(Float, default=0)
-#     user_id = Column(Integer, ForeignKey('users.id'))
-#     user = relationship("User", backref="products")
-#
-#     def __repr__(self):
-#         return f"Товар {self.title}"
-#
-#     def to_json(self) -> Dict[str, Any]:
-#         return {c.name: getattr(self, c.name) for c in
-#                 self.__table__.columns}
-#
-#
-# class User(Base):
-#     __tablename__ = 'users'
-#
-#     id = Column(Integer, primary_key=True)
-#     name = Column(String(50), nullable=False)
-#     surname = Column(String(50), nullable=True)
-#     num = Column(Integer, Identity(minvalue=100, maxvalue=1000, cycle=True))
-#
-#     def __repr__(self):
-#         return f"Пользователь {self.username}"
-#
-#     def to_json(self) -> Dict[str, Any]:
-#         return {c.name: getattr(self, c.name) for c in
-#                 self.__table__.columns}
+logger.debug("Simple logging.")
+
+engine = create_engine('postgresql+psycopg2://user:pswd@localhost:5432/test')
+Base = declarative_base()
+Session = sessionmaker(bind=engine)
+session = Session()
 
 
-# @app.before_request
-# def before_request_func():
-#     Base.metadata.drop_all(engine)
-#     Base.metadata.create_all(engine)
-#
-#     objects = [
-#         User(name='u1'),
-#         User(name='u2'),
-#         User(name='u3'),
-#         Product(title="p1", user_id=1),
-#         Product(title="p2", user_id=2),
-#         Product(title="p3", user_id=3)
-#     ]
-#     session.bulk_save_objects(objects)
+@logger.catch
+def create_db():
+    Base.metadata.drop_all(engine)
+    Base.metadata.create_all(engine)
+    print("База создана")
+
+
+# @logger.catch
+# def add_user():
+#     insert_query = insert(User).values(
+#         id=11,
+#         name="Vasyan",
+#         has_sale=True,
+#         coffee_id=5,
+#         address='{"id": 9957, '
+#         '"uid": "07790388-e8ed-4456-9f9b-9897f8fbbfc8", '
+#         '"city": "Lake Evelin", '
+#         '"street_name": "Christy Points", '
+#         '"street_address": "65857 Ortiz Plains", '
+#         '"secondary_address": "Suite 969", '
+#         '"building_number": "979", "mail_box": "PO Box 312", '
+#         '"community": "Summer Gardens", "zip_code": "51738-5712", '
+#         '"zip": "39244-7001", "postcode": "87960-2311", '
+#         '"time_zone": "America/New_York", "street_suffix": "Bridge", '
+#         '"city_suffix": "bury", "city_prefix": "New", '
+#         '"state": "Virginia", "state_abbr": "DE", '
+#         '"country": "Israel", "country_code": "PS", '
+#         '"latitude": 73.37310321416226, "longitude": 41.80257946317275, '
+#         '"full_address": "Suite 349 66545 Junior Pike, Harveyville, NC 40350-4730"}'
+#     )
+#     do_nothing_stmt = insert_query.on_conflict_do_nothing(index_elements=["id"]). \
+#             returning(User.name, User.coffee_id)
+#     session.execute(do_nothing_stmt)
 #     session.commit()
+#     print("Добавление пользователя выполнено")
 
-
-@app.route('/products/<int:id>', methods=['DELETE'])
-def delete_product_handler(id: int):
-    result = delete(Product).returning(Product.id, Product.title). \
-        where(Product.id == id)
-    deleted_row = session.execute(result).fetchone()
-    if deleted_row:
-        deleted_row_json = dict(id=deleted_row[0], title=deleted_row[1])
-        return jsonify(delete_row_attrs=deleted_row_json)
-
-
-@app.route('/products', methods=['POST'])
-def insert_product_handler():
-    insert_query = insert(Product).values(id='2',
-                                         title='новый продукт')
-    # do nothing
-    # do_nothing_stmt = insert_query \
-    #     .on_conflict_do_nothing(index_elements=['id'])
-    # session.execute(do_nothing_stmt)
-
-    # do update
-    do_update_stmt = insert_query \
-        .on_conflict_do_update(constraint='products_pkey',
-                               set_=dict(title='обновленный продукт'))
-    session.execute(do_update_stmt)
+@logger.catch
+def add_coffee():
+    # coffee = insert(Coffee).values(id=1,
+    #     title="titles",
+    #                                origin="origin",
+    #                                intensifier="intensifer",
+    #                                notes="notes1 notes2")
+    # coffe_stmt = coffee.on_conflict_do_nothing(index_elements=["id"]).returning(Coffee.title)
+    # session.execute(coffe_stmt)
+    # session.commit()
+    coffee = Coffee(title="titles", origin="origin",
+                    intensifier="intensifer", notes="notes1 notes2")
+    session.add(coffee)
     session.commit()
-    return '',200
 
 
-@app.route('/products', methods=['GET'])
-def get_products_handler():
-    products = session.query(Product).all()
-    products_list = []
-    for p in products:
-        product_obj = p.to_json()
-        product_obj['user'] = p.user.to_json()
-        products_list.append(product_obj)
-    return jsonify(products_list)
+@logger.catch
+def read():
+    users_list = []
+    users = session.query(User).all()
+    for user in users:
+        user_obj = user.to_json()
+        user_obj['coffee'] = user.coffee.to_json()
+        users_list.append(user_obj)
+        print(json.dumps(user_obj, indent=2))
+        print("Вывод выполнен")
 
 
-@app.route("/")
-def hello_world():
-    return "helloworld"
 
 
-if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=5000)
+if __name__ == "__main__":
+    create_db()
+
+    # fill_db1()
+    # add_user()
+    read()
+    # add_coffee()
