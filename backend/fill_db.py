@@ -21,7 +21,7 @@ response_type = "response_type=json"
 
 url_user = f"{main_url_user}{resource_user}{'?'}{nums_users}{'&'}{response_type}"
 
-logger.debug("Simple logging.")
+logger.debug("Fill-logging.")
 
 
 class UserSchema(Schema):
@@ -68,7 +68,7 @@ def add_data_in_db(users, address, coffee):
         user.has_sale = random.choice([True, False])
         session.add(user)
     session.commit()
-    print("Добавление данных в базу выполнено")
+    logger.info("Добавление данных в базу выполнено")
 
 
 @logger.catch
@@ -92,7 +92,6 @@ async def get_users():
         users_list.append(user)
 
     return users_list
-
 
 
 @logger.catch
