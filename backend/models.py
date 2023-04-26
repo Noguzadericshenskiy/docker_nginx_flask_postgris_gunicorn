@@ -16,8 +16,7 @@ class BaseClass(Base):
 
 class Coffee(BaseClass):
     __tablename__ = 'coffee'
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    # id = Column(Integer, Sequence('id', start=1), primary_key=True)
+    # idi = Column(Integer, Sequence('id', start=1), primary_key=True)
     title = Column(String(200), nullable=False)
     origin = Column(String(200))
     intensifier = Column(String(100))

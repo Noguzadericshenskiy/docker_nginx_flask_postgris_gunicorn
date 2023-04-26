@@ -1,3 +1,8 @@
+# docker compose -f docker-compose.dev.yml up --build
+# psql
+# docker exec -ti db bash
+# psql postgresql://user:pswd@database:5432/test
+
 services:
   database:
     container_name: db_postgres
@@ -19,7 +24,5 @@ services:
 #    expose:
 #      - 5432
 
-# psql
-# docker exec -ti db bash
-# psql postgresql://user:pswd@database:5432/test
+
 

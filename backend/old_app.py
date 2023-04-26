@@ -1,52 +1,85 @@
 import json
+from sqlalchemy import select
 from sqlalchemy.dialects.postgresql import insert
-from sqlalchemy import Column, Sequence, Integer, String, Float, ForeignKey, Identity, Boolean, JSON
-from sqlalchemy.orm import relationship
-from typing import Dict, Any
-from sqlalchemy import create_engine, MetaData
-from sqlalchemy.orm import declarative_base, sessionmaker
-from sqlalchemy.orm import relationship
+from flask import jsonify
 from loguru import logger
 
 from models import Coffee, User
+from fill_db import fill_db
 from db import engine, Base, session
+
 
 logger.debug("Simple logging.")
 
+
+def before_first_request():
+    Base.metadata.drop_all(engine)
+    Base.metadata.create_all(engine)
+    fill_db()
 
 
 def get_all_users():
     users_list = []
     users = session.query(User).all()
     for user in users:
-        user_obj = user.to_json()
-        user_obj['coffee'] = user.coffee.to_json()
+        user_obj = get_user_by_id(user.id)
         users_list.append(user_obj)
 
     print(json.dumps(users_list, indent=4))
 
 
+def get_user_by_id(id):
+    user = session.query(User).where(User.id == id).one()
+    user_obj = user.to_json()
+    user_obj['coffee'] = user.coffee.to_json()
+    return user_obj
+
+
+# def add_user():
+#     user = User()
+#     user.name = "Vasyan"
+#     user.has_sale = True
+#     user.address = json.dumps({"id": 7388, "uid": "09042327-f80b-4cc0-ba16-9b57b0217868",
+#                                "city": "Margaretatown", "street_name": "Lizeth Coves",
+#                                 "zip_code": "42687"})
+#     user.coffee_id = 5
+#     session.add(user)
+#     session.commit()
+
 @logger.catch
-def add_coffee():
-    # coffee = insert(Coffee).values(id=1,
-    #     title="titles",
-    #                                origin="origin",
-    #                                intensifier="intensifer",
-    #                                notes="notes1 notes2")
-    # coffe_stmt = coffee.on_conflict_do_nothing(index_elements=["id"]).returning(Coffee.title)
-    # session.execute(coffe_stmt)
-    # session.commit()
-    coffee = Coffee(title="titles", origin="origin",
-                    intensifier="intensifer", notes="notes1 notes2")
-    session.add(coffee)
+def add_user():
+    insert_query = insert(User).values(
+        name="Vasyan",
+        has_sale=True,
+        address=json.dumps({"id": 7388, "uid": "09042327-f80b-4cc0-ba16-9b57b0217868",
+                               "city": "Margaretatown", "street_name": "Lizeth Coves",
+                               "zip_code": "42687"}),
+        coffee_id=5
+    ).returning(User.id)
+    user_stmt = session.execute(insert_query).one()
     session.commit()
+    new_user = get_user_by_id(user_stmt[0])
+    print(json.dumps(new_user, indent=4))
 
+@logger.catch
+def search_coffee_by_title(string_search):
+    # coffee = session.query(Coffee).where(Coffee.title=="")
+    coffee_query = select(Coffee.title.match(string_search)).re
 
+    coffe_stmt = session.execute(coffee_query).fetchall()
+    for i in coffe_stmt:
+        print(i)
 
-
+    print(coffe_stmt)
 
 if __name__ == "__main__":
-    get_all_users()
+    # fill_db()
+    # add_user()
+    # add_user()
+    # search_coffee_by_title("Green Coffee")
+    # search_coffee_by_title("Green")
+    search_coffee_by_title("green")
+    # get_all_users()
     # add_user()
     # read()
     # add_coffee()

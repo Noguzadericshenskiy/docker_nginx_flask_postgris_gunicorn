@@ -11,6 +11,13 @@ from fill_db import fill_db
 app = Flask(__name__)
 
 
+def get_user_by_id(id):
+    user = session.query(User).where(User.id == id).one()
+    user_obj = user.to_json()
+    user_obj['coffee'] = user.coffee.to_json()
+    return user_obj
+
+
 @app.before_first_request
 def before_first_request():
     Base.metadata.drop_all(engine)
@@ -25,16 +32,16 @@ def add_user():
     insert_query = insert(User).values(
         name="Vasyan",
         has_sale=True,
-        coffee_id=5,
-        address=json.dumps({"id": 9957, "uid": "07790388-e8ed-4456-9f9b-9897f8fbbfc8"})).\
-        returning(User)
-    # do_nothing_stmt = insert_query.on_conflict_do_nothing(index_elements=['name']).\
-    #     returning(User.name, User.has_sale, User.coffee_id)
-    user_add = session.execute(insert_query)
+        address=json.dumps({"id": 7388, "uid": "09042327-f80b-4cc0-ba16-9b57b0217868",
+                               "city": "Margaretatown", "street_name": "Lizeth Coves",
+                               "zip_code": "42687"}),
+        coffee_id=5
+    ).returning(User.id)
+    user_stmt = session.execute(insert_query).one()
     session.commit()
-    user_obj = session.query(User).where(User.id == user_add['id'])
+    new_user = get_user_by_id(user_stmt[0])
 
-    return 'user_add'
+    return json.dumps(new_user, indent=2)
 
 
 @app.route("/all_users", methods=['GET'])
@@ -42,16 +49,16 @@ def get_all_users():
     users_list = []
     users = session.query(User).all()
     for user in users:
-        user_obj = user.to_json()
-        user_obj['coffee'] = user.coffee.to_json()
+        user_obj = get_user_by_id(user.id)
         users_list.append(user_obj)
 
     return jsonify(users_list)
 
 
-# @app.route("/users", methods=["GET"])
-# def get_all_users():
-#     ...
+
+def search_coffee_by_title():
+    ...
+
 
 
 @app.route("/")
