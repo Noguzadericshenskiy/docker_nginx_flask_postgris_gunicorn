@@ -1,13 +1,13 @@
 import json
 from sqlalchemy.dialects.postgresql import insert
-from sqlalchemy import create_engine
+from sqlalchemy import Column, Sequence, Integer, String, Float, ForeignKey, Identity, Boolean, JSON
+from sqlalchemy.orm import relationship
+from typing import Dict, Any
+from sqlalchemy import create_engine, MetaData
 from sqlalchemy.orm import declarative_base, sessionmaker
-
-from models import User, Coffee
-from cli import fill_db1
-
+from sqlalchemy.orm import relationship
 from loguru import logger
-
+from cli import fill_db1
 
 logger.debug("Simple logging.")
 
@@ -17,10 +17,44 @@ Session = sessionmaker(bind=engine)
 session = Session()
 
 
+
+class BaseClass(Base):
+    __abstract__ = True
+    id = Column(Integer, primary_key=True, autoincrement=True)
+
+    def to_json(self) -> Dict[str, Any]:
+        return {c.name: getattr(self, c.name) for c in
+                self.__table__.columns}
+
+
+class Coffee(BaseClass):
+    __tablename__ = 'coffee'
+
+    # id = Column(Integer, Sequence('id', start=1), primary_key=True)
+    title = Column(String(200), nullable=False)
+    origin = Column(String(200))
+    intensifier = Column(String(100))
+    notes = Column(String())
+
+
+class User(BaseClass):
+    __tablename__ = 'users'
+
+    # id = Column(Integer, Sequence('id', start=1), primary_key=True)
+    name = Column(String(50), nullable=False)
+    has_sale = Column(Boolean)
+    address = Column(JSON)
+    coffee_id = Column(Integer, ForeignKey("coffee.id"))
+
+    coffee = relationship("Coffee", backref="users", lazy='joined')
+
+
 @logger.catch
 def create_db():
     Base.metadata.drop_all(engine)
     Base.metadata.create_all(engine)
+
+
     print("База создана")
 
 
@@ -71,22 +105,24 @@ def add_coffee():
 
 @logger.catch
 def read():
-    users_list = []
-    users = session.query(User).all()
-    for user in users:
-        user_obj = user.to_json()
-        user_obj['coffee'] = user.coffee.to_json()
-        users_list.append(user_obj)
-        print(json.dumps(user_obj, indent=2))
-        print("Вывод выполнен")
+    # users_list = []
+    # users = session.query(User).all()
+    # for user in users:
+    #     user_obj = user.to_json()
+    #     user_obj['coffee'] = user.coffee.to_json()
+    #     users_list.append(user_obj)
+    #     print(json.dumps(user_obj, indent=2))
+    #     print("Вывод выполнен")
 
-
+    coffee = session.query(Coffee).all()
+    for c in coffee:
+        print(c)
 
 
 if __name__ == "__main__":
     create_db()
 
-    # fill_db1()
+    fill_db1()
     # add_user()
-    read()
+    # read()
     # add_coffee()

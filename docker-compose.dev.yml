@@ -1,0 +1,24 @@
+services:
+  database:
+    container_name: db_postgres
+    image: postgres:15.2-alpine
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_USER: "user"
+      POSTGRES_PASSWORD: "pswd"
+      POSTGRES_DB: "test"
+#      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+#      Инициализация бд
+#      - ./init_db. Init Database:/docker-entrypoint-initdb.d
+#      монтируем папку для хранения данных на хосте из контейнера
+      - ./data:/var/lib/postgresql/data
+      - ./myPostgresql.conf:/var/lib/postgresql/data/postgresql.conf
+#    expose:
+#      - 5432
+
+# psql
+# docker exec -ti db bash
+# psql postgresql://user:pswd@database:5432/test
+

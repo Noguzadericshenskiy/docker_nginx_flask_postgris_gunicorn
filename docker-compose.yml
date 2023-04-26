@@ -2,8 +2,8 @@
 # docker compose -f docker-compose.yml up -d --build
 # docker compose up --build
 # docker exec -it nginx bash
-# docker build . -t static
-
+# docker build . -t test
+# docker compose exec app_flask python cli.py create_db
 
 version: '3.8'
 
@@ -19,11 +19,8 @@ services:
       POSTGRES_DB: "test"
       PGDATA: /var/lib/postgresql/data/pgdata
     volumes:
-#      Инициализация бд
-#      - ./init_db. Init Database:/docker-entrypoint-initdb.d
-#      монтируем папку для хранения данных на хосте из контейнера
-      - ./pg_data:/var/lib/postgresql/data/pgdata
-#      - ./postgresql.conf:/var/lib/postgresql/data/postgresql.conf
+      - ./data:/var/lib/postgresql/data/pgdata
+      - ./myPostgresql.conf:/var/lib/postgresql/data/postgresql.conf
     expose:
       - 5432
     restart: on-failure
@@ -37,6 +34,8 @@ services:
 #    command: python app.py run -h 0.0.0.0
     working_dir: /backend
     restart: on-failure
+#    ports:
+#      - 5000:5000
     expose:
       - 5000
     env_file:
