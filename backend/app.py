@@ -1,7 +1,10 @@
 import os
 import json
-from flask import Flask, send_from_directory, jsonify
+
+from flask import Flask, send_from_directory, jsonify, request
 from sqlalchemy.dialects.postgresql import insert
+from sqlalchemy import select
+from typing import Dict, Any, Optional
 
 from db import session, Base, engine
 from models import User, Coffee
@@ -18,7 +21,7 @@ def get_user_by_id(id):
     return user_obj
 
 
-@app.before_first_request
+# @app.before_first_request
 def before_first_request():
     Base.metadata.drop_all(engine)
     Base.metadata.create_all(engine)
@@ -41,7 +44,7 @@ def add_user():
     session.commit()
     new_user = get_user_by_id(user_stmt[0])
 
-    return json.dumps(new_user, indent=2)
+    return json.dumps(new_user, indent=4)
 
 
 @app.route("/all_users", methods=['GET'])
@@ -55,10 +58,17 @@ def get_all_users():
     return jsonify(users_list)
 
 
-
+@app.route('/get_coffee/', methods=['GET'])
 def search_coffee_by_title():
-    ...
-
+    """Поиск кофе по названию"""
+    string_search = request.args.get("coffee_title")
+    coffee_list = []
+    coffee_query = select(Coffee).where(Coffee.title.match(string_search))
+    coffee_stmt = session.execute(coffee_query).all()
+    for coffee_obj in coffee_stmt:
+        coffee = coffee_obj[0].to_json()
+        coffee_list.append(coffee)
+    return json.dumps(coffee_list, indent=4)
 
 
 @app.route("/")

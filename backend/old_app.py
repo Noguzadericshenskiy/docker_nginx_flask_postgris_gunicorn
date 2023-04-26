@@ -2,6 +2,8 @@ import json
 from sqlalchemy import select
 from sqlalchemy.dialects.postgresql import insert
 from flask import jsonify
+from typing import Dict, Any, Optional
+
 from loguru import logger
 
 from models import Coffee, User
@@ -34,7 +36,6 @@ def get_user_by_id(id):
     user_obj['coffee'] = user.coffee.to_json()
     return user_obj
 
-
 # def add_user():
 #     user = User()
 #     user.name = "Vasyan"
@@ -63,14 +64,16 @@ def add_user():
 
 @logger.catch
 def search_coffee_by_title(string_search):
+    " -> Dict[str, Any]"
     # coffee = session.query(Coffee).where(Coffee.title=="")
-    coffee_query = select(Coffee.title.match(string_search)).re
+    coffee_list = []
+    coffee_query = select(Coffee).where(Coffee.title.match(string_search))
+    coffe_stmt = session.execute(coffee_query).all()
+    for coffee_obj in coffe_stmt:
+        coffee = coffee_obj[0].to_json()
+        coffee_list.append(coffee)
+    print(coffee_list)
 
-    coffe_stmt = session.execute(coffee_query).fetchall()
-    for i in coffe_stmt:
-        print(i)
-
-    print(coffe_stmt)
 
 if __name__ == "__main__":
     # fill_db()

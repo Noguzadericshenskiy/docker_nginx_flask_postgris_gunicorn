@@ -13,6 +13,9 @@ class BaseClass(Base):
         return {c.name: getattr(self, c.name) for c in
                 self.__table__.columns}
 
+    def __json__(self):
+        return ['song', 'src', 'type', 'created_at']
+
 
 class Coffee(BaseClass):
     __tablename__ = 'coffee'
