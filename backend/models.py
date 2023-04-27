@@ -1,5 +1,6 @@
 from sqlalchemy import Column, Sequence, Integer, String, Float, ForeignKey, Identity, Boolean, JSON
 from sqlalchemy.orm import relationship
+# from sqlalchemy.dialects.postgresql import JSONB
 from typing import Dict, Any
 
 from db import Base
