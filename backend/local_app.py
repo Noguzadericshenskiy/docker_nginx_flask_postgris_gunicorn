@@ -95,8 +95,8 @@ def foo():
     ...
 
 if __name__ == "__main__":
-    # before_first_request()
-    # fill_db()
+    before_first_request()
+    fill_db()
 
     # add_user()
     # add_user()
