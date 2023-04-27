@@ -42,6 +42,7 @@ class CoffeeSchema(Schema):
         unknown = EXCLUDE
 
 
+@logger.catch
 def fill_db():
     list_users = asyncio.run(get_users())
     list_address = asyncio.run(get_address())
@@ -55,7 +56,7 @@ def add_data_in_db(users, address, coffee):
     for i_record in range(number_of_records):
         coffee_inst = Coffee()
         coffee_inst.title = coffee[i_record]["blend_name"]
-        coffee_inst.notes = coffee[i_record]["notes"]
+        coffee_inst.notes = [i.lstrip(" ") if i[0] == ' ' else i for i in (coffee[i_record]["notes"]).split(',')]
         coffee_inst.intensifier = coffee[i_record]["intensifier"]
         coffee_inst.origin = coffee[i_record]["origin"]
         session.add(coffee_inst)

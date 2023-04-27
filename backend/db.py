@@ -8,7 +8,7 @@ name = os.getenv("NAME_DB")
 host = 'database'
 port = "5432"
 
-# URL = f"postgresql://{user}:{password}@{host}:{port}/{name}"
+# URL = f"postgresql+psycopg2://{user}:{password}@{host}:{port}/{name}"
 URL = "postgresql+psycopg2://user:pswd@localhost:5432/test"
 
 # engine = create_engine(os.getenv("DATABASE_URL", "sqlite://"))

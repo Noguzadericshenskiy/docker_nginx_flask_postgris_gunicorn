@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Sequence, Integer, String, Float, ForeignKey, Identity, Boolean, JSON
+from sqlalchemy import Column, Sequence, Integer, String, Float, ForeignKey, Identity, Boolean, JSON, ARRAY
 from sqlalchemy.orm import relationship
 # from sqlalchemy.dialects.postgresql import JSONB
 from typing import Dict, Any
@@ -14,9 +14,6 @@ class BaseClass(Base):
         return {c.name: getattr(self, c.name) for c in
                 self.__table__.columns}
 
-    def __json__(self):
-        return ['song', 'src', 'type', 'created_at']
-
 
 class Coffee(BaseClass):
     __tablename__ = 'coffee'
@@ -24,7 +21,7 @@ class Coffee(BaseClass):
     title = Column(String(200), nullable=False)
     origin = Column(String(200))
     intensifier = Column(String(100))
-    notes = Column(String())
+    notes = Column(ARRAY(String))
 
 
 class User(BaseClass):

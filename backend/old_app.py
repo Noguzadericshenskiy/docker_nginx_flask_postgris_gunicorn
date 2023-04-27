@@ -18,7 +18,6 @@ logger.debug("Simple logging.")
 def before_first_request():
     Base.metadata.drop_all(engine)
     Base.metadata.create_all(engine)
-    fill_db()
 
 
 def get_all_users():
@@ -36,17 +35,6 @@ def get_user_by_id(id):
     user_obj = user.to_json()
     user_obj['coffee'] = user.coffee.to_json()
     return user_obj
-
-# def add_user():
-#     user = User()
-#     user.name = "Vasyan"
-#     user.has_sale = True
-#     user.address = json.dumps({"id": 7388, "uid": "09042327-f80b-4cc0-ba16-9b57b0217868",
-#                                "city": "Margaretatown", "street_name": "Lizeth Coves",
-#                                 "zip_code": "42687"})
-#     user.coffee_id = 5
-#     session.add(user)
-#     session.commit()
 
 
 @logger.catch
@@ -103,15 +91,20 @@ def get_user_by_country(country):
     print(user)
 
 
+def foo():
+    ...
+
 if __name__ == "__main__":
+    # before_first_request()
     # fill_db()
+
     # add_user()
     # add_user()
     # search_coffee_by_title("Green Coffee")
     # search_coffee_by_title("Green")
     # search_coffee_by_title("green")
-    get_user_by_country('Spain')
-    # get_all_users()
+    # get_user_by_country('Spain')
+    get_all_users()
     # add_user()
     # read()
     # add_coffee()
