@@ -4,11 +4,14 @@ import json
 from flask import Flask, send_from_directory, jsonify, request
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy import select
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Optional, List
+
+import models
 
 from db import session, Base, engine
 from models import User, Coffee
 from fill_db import fill_db
+from schemas import schema
 
 
 app = Flask(__name__)
@@ -44,7 +47,7 @@ def add_user():
     session.commit()
     new_user = get_user_by_id(user_stmt[0])
 
-    return json.dumps(new_user, indent=4)
+    return json.dumps(new_user, indent=4), 201
 
 
 @app.route("/all_users", methods=['GET'])
@@ -55,7 +58,7 @@ def get_all_users():
         user_obj = get_user_by_id(user.id)
         users_list.append(user_obj)
 
-    return jsonify(users_list)
+    return jsonify(users_list), 200
 
 
 @app.route('/get_coffee/', methods=['GET'])
@@ -68,7 +71,21 @@ def search_coffee_by_title():
     for coffee_obj in coffee_stmt:
         coffee = coffee_obj[0].to_json()
         coffee_list.append(coffee)
-    return json.dumps(coffee_list, indent=4)
+    return json.dumps(coffee_list, indent=4), 200
+
+# , response_model=List[schema.UserOut]
+@ app.route("/get_user_by_country", methods=['GET'])
+def get_user_by_country():
+    users_list = []
+    country = request.args.get("country")
+    users = session.query(User).where(User.address["country"].as_string() == country).all()
+
+    for user in users:
+        # user_obj = get_user_by_id(user.id)
+        user_obj = jsonify(schema.UserOut(user).coffee)
+        users_list.append(user_obj)
+
+    return users_list, 200
 
 
 @app.route("/")

@@ -4,6 +4,7 @@ from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.sql.expression import cast
 from flask import jsonify
 from typing import Dict, Any, Optional
+from schemas.schema import UserIn, UserOut, CoffeeIn, CoffeeOut
 
 from loguru import logger
 
@@ -76,35 +77,28 @@ def unic_element(string_search):
 
 # @logger.catch
 def get_user_by_country(country):
-    # user = session.query(User).where(json.loads(User.address)['country'] == country).one()
-    # user = session.query(User).where(User.id == 1).one()
+    users_list = []
+    users = session.query(User).where(User.address["country"].as_string() == country).all()
+    for user in users:
+        user_obj = get_user_by_id(user.id)
+        users_list.append(user_obj)
 
-    # user = session.query(User).filter(User.address.comparator.contains(["country"])).all()
-    # user = session.query(User.address).filter(User.address["id":"3097"].as_string() != '3097').all()
-    user = session.query(User.address).first()
-    # where(
-    #     func.json_contains(Foo.bar, func.json_object("country", "some_value"))
+    print(json.dumps(users_list, indent=4))
+    # print(user[0])
 
-    # user_obj = user.to_json()
-    # user_obj['coffee'] = user.coffee.to_json()
-    # print(json.dumps(user_obj, indent=4))
-    print(user)
-
-
-def foo():
-    ...
+# return jsonify( {data': CitiesResponseSchema().dump(city)} ), 200
 
 if __name__ == "__main__":
-    before_first_request()
-    fill_db()
+    # before_first_request()
+    # fill_db()
 
     # add_user()
     # add_user()
     # search_coffee_by_title("Green Coffee")
     # search_coffee_by_title("Green")
     # search_coffee_by_title("green")
-    # get_user_by_country('Spain')
-    get_all_users()
+    get_user_by_country('Anguilla')
+    # get_all_users()
     # add_user()
     # read()
     # add_coffee()

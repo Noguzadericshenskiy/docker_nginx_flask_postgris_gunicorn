@@ -64,7 +64,7 @@ def add_data_in_db(users, address, coffee):
     for i_record in range(number_of_records):
         user = User()
         user.name = users[i_record]["first_name"] + " " + users[i_record]["last_name"]
-        user.address = json.dumps(address[i_record])
+        user.address = address[i_record]
         user.coffee_id = random.randint(1, number_of_records)
         user.has_sale = random.choice([True, False])
         session.add(user)
