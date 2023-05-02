@@ -33,9 +33,6 @@ class BaseCoffee(BaseModel):
     notes: list = Field(
         title='Нотки',
         description='Нотки')
-    # ingredient_list: List[IngredientOut] = Field(
-    #     title='Список ингредиентов',
-    #     description='Список ингредиентов')
 
 
 class CoffeeIn(BaseCoffee):

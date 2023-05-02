@@ -13,7 +13,7 @@ services:
       POSTGRES_USER: "user"
       POSTGRES_PASSWORD: "pswd"
       POSTGRES_DB: "test"
-#      PGDATA: /var/lib/postgresql/data/pgdata
+      PGDATA: /var/lib/postgresql/data/pgdata
     volumes:
 #      Инициализация бд
 #      - ./init_db. Init Database:/docker-entrypoint-initdb.d

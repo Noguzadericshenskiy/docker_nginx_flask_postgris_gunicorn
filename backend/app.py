@@ -73,19 +73,38 @@ def search_coffee_by_title():
         coffee_list.append(coffee)
     return json.dumps(coffee_list, indent=4), 200
 
+
 # , response_model=List[schema.UserOut]
 @ app.route("/get_user_by_country", methods=['GET'])
 def get_user_by_country():
+    """Список пользователей, проживающих в стране"""
     users_list = []
     country = request.args.get("country")
     users = session.query(User).where(User.address["country"].as_string() == country).all()
 
     for user in users:
-        # user_obj = get_user_by_id(user.id)
-        user_obj = jsonify(schema.UserOut(user).coffee)
+        user_obj = user.to_json()
+        response_model = user.schema.UserOut()
+        print(response_model)
         users_list.append(user_obj)
 
-    return users_list, 200
+    return json.dumps(users_list, indent=4), 200
+
+
+@app.route("/unique_alement", methods=['GET'])
+def unique_element():
+    """Список уникальных элементов в заметках к кофе."""
+    list_unique_elements = []
+
+    id = request.args.get("id")
+
+    notes = session.query(Coffee.notes).filter(Coffee.id == id).scalar()
+
+    for i in notes:
+        result = session.query(Coffee).where(Coffee.notes.any(i)).count()
+        if result == 1:
+            list_unique_elements.append(i)
+    return jsonify(list_unique_elements)
 
 
 @app.route("/")

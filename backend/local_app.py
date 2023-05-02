@@ -1,6 +1,6 @@
 import json
 from sqlalchemy import select, func
-from sqlalchemy.dialects.postgresql import insert
+from sqlalchemy.dialects.postgresql import insert, Any
 from sqlalchemy.sql.expression import cast
 from flask import jsonify
 from typing import Dict, Any, Optional
@@ -57,7 +57,6 @@ def add_user():
 @logger.catch
 def search_coffee_by_title(string_search):
     " -> Dict[str, Any]"
-    # coffee = session.query(Coffee).where(Coffee.title=="")
     coffee_list = []
     coffee_query = select(Coffee).where(Coffee.title.match(string_search))
     coffe_stmt = session.execute(coffee_query).all()
@@ -65,14 +64,6 @@ def search_coffee_by_title(string_search):
         coffee = coffee_obj[0].to_json()
         coffee_list.append(coffee)
     print(coffee_list)
-
-
-@logger.catch
-def unic_element(string_search):
-    "Список уникальных элементов в заметках к кофе."
-    elements = []
-    element_query = select(Coffee).where(Coffee.notes.match(string_search) == False)
-    return 'ok'
 
 
 # @logger.catch
@@ -88,16 +79,35 @@ def get_user_by_country(country):
 
 # return jsonify( {data': CitiesResponseSchema().dump(city)} ), 200
 
+
+def unique_element():
+    """Список уникальных элементов в заметках к кофе."""
+    id = 8
+    list_unique_elements = []
+    notes = session.query(Coffee.notes).filter(Coffee.id == id).scalar()
+    print('notes', notes)
+    for i in notes:
+        result = session.query(Coffee).where(Coffee.notes.any(i)).count()
+        if result == 1:
+            list_unique_elements.append(i)
+    print(list_unique_elements)
+
+
+
+
+
+
 if __name__ == "__main__":
     # before_first_request()
     # fill_db()
+    unique_element()
 
     # add_user()
     # add_user()
     # search_coffee_by_title("Green Coffee")
     # search_coffee_by_title("Green")
     # search_coffee_by_title("green")
-    get_user_by_country('Anguilla')
+    # get_user_by_country('Anguilla')
     # get_all_users()
     # add_user()
     # read()
