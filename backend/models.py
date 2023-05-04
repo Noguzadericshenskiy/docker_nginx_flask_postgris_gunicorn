@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Sequence, Integer, String, Float, ForeignKey, Identity, Boolean, JSON, ARRAY
+from sqlalchemy import Column, Integer, String, ForeignKey, Boolean, JSON, ARRAY
 from sqlalchemy.orm import relationship
 # from sqlalchemy.dialects.postgresql import JSONB
 from typing import Dict, Any
@@ -17,7 +17,6 @@ class BaseClass(Base):
 
 class Coffee(BaseClass):
     __tablename__ = 'coffee'
-    # idi = Column(Integer, Sequence('id', start=1), primary_key=True)
     title = Column(String(200), nullable=False)
     origin = Column(String(200))
     intensifier = Column(String(100))
@@ -27,7 +26,6 @@ class Coffee(BaseClass):
 class User(BaseClass):
     __tablename__ = 'users'
 
-    # id = Column(Integer, Sequence('id', start=1), primary_key=True)
     name = Column(String(50), nullable=False)
     has_sale = Column(Boolean)
     address = Column(JSON)
